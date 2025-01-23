@@ -1,21 +1,27 @@
 import { View, TextInput, Button, Alert } from 'react-native';
-import { useState } from 'react';
-import { supabase } from '../../lib/supabase';
+import { useEffect, useState } from 'react';
+import { supabase } from '../lib/supabase';
 import { Href, router, useLocalSearchParams } from 'expo-router';
 
 export default function Login() {
+    useEffect(() => {
+        console.log('Login screen mounted');
+    }, []);
+
     const [phoneNumber, setPhoneNumber] = useState('');
 
     const handleSendCode = async () => {
         try {
-            const formattedPhone = phoneNumber.startsWith('+') ? phoneNumber : `+${phoneNumber}`;
+            const formattedPhone = phoneNumber.startsWith('+1') ? phoneNumber : `+1${phoneNumber}`;
+            // const formattedPhone = phoneNumber
+            console.log(formattedPhone)
             const { error } = await supabase.auth.signInWithOtp({
                 phone: formattedPhone,
             });
 
             if (error) throw error;
             router.push({
-                pathname: '/auth/verify',
+                pathname: '/verify',
                 params: { phoneNumber: formattedPhone }
             });
         } catch (error) {

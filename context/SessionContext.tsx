@@ -1,9 +1,10 @@
 // contexts/SessionContext.tsx
 import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { supabase } from '@/utils/supabase';
+import { supabase } from '@/lib/supabase';
 import { User, Session } from '@supabase/supabase-js';
 import { SupabaseSession } from '@/types/supabase';
+import { router } from 'expo-router';
 
 interface SessionContextType {
     session: Session | null;
@@ -64,9 +65,11 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
     };
 
     const signOut = async () => {
+        console.log("signing out");
         await supabase.auth.signOut();
         setSession(null);
         setUser(null);
+        router.replace({ pathname: '/login' });
     };
 
     return (

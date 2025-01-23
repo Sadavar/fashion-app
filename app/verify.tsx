@@ -1,8 +1,8 @@
 // app/auth/verify.tsx
 import { View, TextInput, Button, Alert } from 'react-native';
 import { useState } from 'react';
-import { supabase } from '../../lib/supabase';
-import { useLocalSearchParams } from 'expo-router';
+import { supabase } from '../lib/supabase';
+import { ExternalPathString, router, useLocalSearchParams } from 'expo-router';
 
 export default function Verify() {
     const [code, setCode] = useState('');
@@ -17,6 +17,12 @@ export default function Verify() {
             });
 
             if (error) throw error;
+            else {
+                console.log('verify successful')
+                router.replace({ pathname: '/(tabs)' });
+            }
+
+
             // The auth state change listener in _layout will handle navigation
         } catch (error) {
             Alert.alert('Error', (error as Error).message);

@@ -1,6 +1,6 @@
 import { View, TextInput, Button, Alert } from 'react-native';
 import { useState } from 'react';
-import { supabase } from '../../lib/supabase';
+import { supabase } from '../lib/supabase';
 import { ExternalPathString, Href, Redirect, router } from 'expo-router';
 
 export default function Username() {
@@ -32,7 +32,12 @@ export default function Username() {
                 });
 
             if (error) throw error;
-            <Redirect href={'/(app' as ExternalPathString} />
+
+            console.log("username set");
+            router.replace({
+                pathname: '/(tabs)'
+            });
+
         } catch (error) {
             Alert.alert('Error', (error as Error).message);
         }
