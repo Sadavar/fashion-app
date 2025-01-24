@@ -7,7 +7,7 @@ export default function Discover() {
     }, []);
     return (
         <View>
-            <Text>Discover</Text>
+            <Text className="">Discover</Text>
         </View>
     );
 }

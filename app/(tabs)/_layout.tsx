@@ -64,33 +64,35 @@ export default function TabLayout() {
     }
 
     return (
-        <Tabs
-        >
+        <Tabs>
             <Tabs.Screen
                 name="index"
                 options={{
-                    title: 'Discover',
                     tabBarIcon: ({ color }) => (
-                        <MaterialIcons name="explore" size={24} color={color} />
+                        <MaterialIcons name="explore" size={30} color={color} />
                     ),
+                    tabBarLabel: () => null,
+                    headerTitle: 'Discover',
                 }}
             />
             <Tabs.Screen
                 name="post"
                 options={{
-                    title: 'Post',
                     tabBarIcon: ({ color }) => (
-                        <MaterialIcons name="camera-alt" size={24} color={color} />
+                        <MaterialIcons name="add-box" size={30} color={color} />
                     ),
+                    tabBarLabel: () => null,
+                    headerTitle: 'Post',
                 }}
             />
             <Tabs.Screen
                 name="profile"
                 options={{
-                    title: 'Profile',
                     tabBarIcon: ({ color }) => (
-                        <MaterialIcons name="person" size={24} color={color} />
+                        <MaterialIcons name="person" size={30} color={color} />
                     ),
+                    tabBarLabel: () => null,
+                    headerTitle: 'Profile',
                 }}
             />
         </Tabs>

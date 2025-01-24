@@ -9,6 +9,7 @@ import { router } from 'expo-router';
 interface SessionContextType {
     session: Session | null;
     user: User | null;
+    username: string | null;
     signInWithPhone: (phone: string) => Promise<void>;
     verifyOtp: (phone: string, token: string) => Promise<SupabaseSession>;
     signOut: () => Promise<void>;
@@ -27,6 +28,19 @@ export const useSession = () => {
 export const SessionProvider = ({ children }: { children: ReactNode }) => {
     const [session, setSession] = useState<Session | null>(null);
     const [user, setUser] = useState<User | null>(null);
+    const [username, setUsername] = useState<string | null>(null);
+
+    const fetchUsername = async (userId: string) => {
+        const { data, error } = await supabase
+            .from('profiles')
+            .select('username')
+            .eq('id', userId)
+            .single();
+
+        if (!error && data) {
+            setUsername(data.username);
+        }
+    };
 
     useEffect(() => {
         const loadSession = async () => {
@@ -35,8 +49,11 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
                 console.error('Error getting session:', error);
                 return;
             }
-            setSession(data.session);
-            setUser(data.session?.user || null);
+            if (data.session?.user) {
+                setSession(data.session);
+                setUser(data.session.user);
+                await fetchUsername(data.session.user.id);
+            }
         };
         loadSession();
     }, []);
@@ -61,6 +78,8 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
         if (!data.session) throw new Error('No session returned from verifyOtp');
         setSession(data.session);
         setUser(data.session.user);
+        await fetchUsername(data.session.user.id);
+        if (!data.user) throw new Error('No user returned from verifyOtp');
         return { user: data.user, session: data.session };
     };
 
@@ -73,7 +92,7 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
     };
 
     return (
-        <SessionContext.Provider value={{ session, user, signInWithPhone, verifyOtp, signOut }}>
+        <SessionContext.Provider value={{ session, user, username, signInWithPhone, verifyOtp, signOut }}>
             {children}
         </SessionContext.Provider>
     );

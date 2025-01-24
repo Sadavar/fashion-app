@@ -1,11 +1,11 @@
-import { Slot, Stack } from 'expo-router';
+import { Slot } from 'expo-router';
 import { useEffect } from 'react';
-import { useRouter } from 'expo-router';
 import { SessionProvider } from '@/context/SessionContext';
 
-export default function RootLayout() {
-  const router = useRouter();
+import "../global.css";
 
+
+export default function RootLayout() {
   useEffect(() => {
     console.log('Root layout mounted');
   }, []);
