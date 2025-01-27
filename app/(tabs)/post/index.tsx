@@ -1,40 +1,27 @@
-import React, { useEffect, useState } from 'react';
-import { Button, ScrollView, TextInput, Image, TouchableWithoutFeedback, View, Keyboard } from 'react-native';
-import * as ImagePicker from 'expo-image-picker';
+
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { Button, ScrollView, TextInput, Image, TouchableWithoutFeedback, View, Keyboard, Text } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
 import { supabase } from '@/lib/supabase';
 import { decode } from 'base64-arraybuffer';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { useSession } from '@/context/SessionContext';
 import uuid from 'react-native-uuid';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 
 export default function PostScreen() {
-    const [image, setImage] = useState<string | null>(null);
+    const context = useSession();
+    const router = useRouter();
+    const { image } = useLocalSearchParams<{ image: string }>();
+
     const [description, setDescription] = useState('');
     const [brandsInput, setBrandsInput] = useState('');  // New state for brands
     const [loading, setLoading] = useState(false);
-    const context = useSession();
 
     useEffect(() => {
         console.log('PostScreen mounted');
     }, []);
 
-    const pickImage = async () => {
-        console.log('Picking image...');
-        let result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
-            allowsEditing: true,
-            aspect: [4, 3],
-            quality: 1,
-        });
-
-        if (!result.canceled) {
-            console.log('Image selected:', result.assets[0].uri);
-            setImage(result.assets[0].uri);
-        } else {
-            console.log('Image selection canceled');
-        }
-    };
 
     const uploadPost = async () => {
         if (!image) {
@@ -137,11 +124,11 @@ export default function PostScreen() {
             }
 
             // Reset form after successful upload
-            setImage(null);
             setDescription('');
             setBrandsInput('');
             console.log('Post created successfully');
             alert('Post created successfully!');
+            router.replace({ pathname: '/profile' });
 
         } catch (error) {
             console.error('Error during post creation:', error);
@@ -155,12 +142,6 @@ export default function PostScreen() {
     return (
         <KeyboardAwareScrollView>
             <ThemedText style={{ fontSize: 24, marginBottom: 20 }}>Post Outfit</ThemedText>
-
-            <Button
-                title={image ? "Change Photo" : "Select Photo"}
-                onPress={pickImage}
-                disabled={loading}
-            />
 
             {image && (
                 <Image

@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import { SessionProvider } from '@/context/SessionContext';
 
 import "../global.css";
+import { NavigationContainer } from '@react-navigation/native';
 
 
 export default function RootLayout() {
@@ -12,7 +13,9 @@ export default function RootLayout() {
 
   return (
     <SessionProvider>
-      <Slot />
+      <NavigationContainer>
+        <Slot />
+      </NavigationContainer >
     </SessionProvider>
   );
 }

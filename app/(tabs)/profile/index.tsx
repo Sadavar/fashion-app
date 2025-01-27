@@ -111,7 +111,7 @@ export default function Profile() {
                     renderItem={renderPostItem}
                     keyExtractor={(item) => item.uuid}
                     numColumns={3}
-                    contentContainerStyle={{}}
+                    estimatedItemSize={124}
                 />
             )}
             <Button
