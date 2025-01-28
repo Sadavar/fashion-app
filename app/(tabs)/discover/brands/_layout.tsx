@@ -11,6 +11,7 @@ export default function BrandsLayout() {
                     headerShown: false
                 }}
             />
+            <Stack.Screen name="[id]" />
         </Stack>
     );
 }

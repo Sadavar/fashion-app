@@ -10,7 +10,7 @@ import {
     Animated
 } from 'react-native';
 import { TabView, SceneMap } from 'react-native-tab-view';
-import { useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import GlobalScreen from './global';
 import FriendsScreen from './friends';
 import BrandsScreen from './brands';
@@ -53,7 +53,17 @@ const CustomTabBar = ({ navigationState, position, setIndex }: any) => {
                     <TouchableOpacity
                         key={route.key}
                         style={[styles.tabItem, { width: tabWidth }]}
-                        onPress={() => setIndex(i)}
+                        // onPress={() => setIndex(i)}
+                        onPress={() => {
+                            console.log("tab pressed", route.key);
+                            setIndex(i);
+                            router.push({
+                                pathname: "/(tabs)/discover",
+                                params: {
+                                    tab: route.key
+                                }
+                            })
+                        }}
                     >
                         <Text style={[
                             styles.tabText,
@@ -70,6 +80,9 @@ const CustomTabBar = ({ navigationState, position, setIndex }: any) => {
 
 export default function DiscoverLayout() {
     const { tab } = useLocalSearchParams();
+    console.log("tab", tab);
+    const { brand_id } = useLocalSearchParams();
+    console.log("brand_id", brand_id);
     const layout = useWindowDimensions();
 
     const [index, setIndex] = useState(0);

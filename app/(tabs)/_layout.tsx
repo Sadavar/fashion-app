@@ -6,6 +6,8 @@ import { supabase } from '@/lib/supabase';
 import { ActivityIndicator, Button, Dimensions, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
+import { Image } from 'expo-image';
+import * as FileSystem from 'expo-file-system';
 import * as ImagePicker from 'expo-image-picker';
 
 import { Modalize } from 'react-native-modalize';
@@ -56,6 +58,46 @@ export default function TabLayout() {
         checkUser();
     }, []);
 
+    const prefetchPosts = async (user: any) => {
+        console.log("prefetching posts for user:", user.id);
+        // get image_urls
+        const { data: posts } = await supabase.from('posts').select('image_url').eq('user_uuid', user.id);
+        console.log("posts:", posts);
+        if (!posts) {
+            console.log("no image urls");
+            return;
+        }
+        try {
+            // Create an array of prefetch promises
+            const prefetchTasks = posts.map(async (url) => {
+                // First try to load into memory cache
+                try {
+                    await Image.prefetch(url.image_url);
+                    console.log(`Successfully prefetched: ${url.image_url}`);
+                } catch (error) {
+                    console.warn(`Memory cache prefetch failed for ${url.image_url}:`, error);
+
+                    // If memory cache fails, try to download to disk cache
+                    try {
+                        const filename = url.image_url.split('/').pop();
+                        const path = `${FileSystem.cacheDirectory}${filename}`;
+
+                        await FileSystem.downloadAsync(url.image_url, path);
+                        console.log(`Downloaded to disk cache: ${url.image_url}`);
+                    } catch (diskError) {
+                        console.error(`Disk cache download failed for ${url}:`, diskError);
+                    }
+                }
+            });
+
+            // Wait for all prefetch operations to complete
+            await Promise.all(prefetchTasks);
+            console.log('All images prefetched successfully');
+        } catch (error) {
+            console.error('Error prefetching images:', error);
+        }
+    }
+
     const checkUser = async () => {
         try {
             // Get current user
@@ -79,6 +121,7 @@ export default function TabLayout() {
                 } else {
                     console.log('has username, going to tabs');
                     setInitialRoute('/(tabs)');
+                    // prefetchPosts(user);
                 }
             }
         } catch (error) {

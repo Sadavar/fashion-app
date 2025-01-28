@@ -4,7 +4,9 @@ import { SessionProvider } from '@/context/SessionContext';
 
 import "../global.css";
 import { NavigationContainer } from '@react-navigation/native';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
+const queryClient = new QueryClient();
 
 export default function RootLayout() {
   useEffect(() => {
@@ -13,9 +15,11 @@ export default function RootLayout() {
 
   return (
     <SessionProvider>
-      <NavigationContainer>
-        <Slot />
-      </NavigationContainer >
+      <QueryClientProvider client={queryClient}>
+        <NavigationContainer>
+          <Slot />
+        </NavigationContainer >
+      </QueryClientProvider>
     </SessionProvider>
   );
 }
