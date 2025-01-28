@@ -1,4 +1,6 @@
-import React, { useState, useRef } from 'react';
+
+
+import React, { useState, useEffect, useRef } from 'react';
 import {
     View,
     useWindowDimensions,
@@ -8,38 +10,44 @@ import {
     Animated
 } from 'react-native';
 import { TabView, SceneMap } from 'react-native-tab-view';
+import { useLocalSearchParams } from 'expo-router';
 import GlobalScreen from './global';
 import FriendsScreen from './friends';
 import BrandsScreen from './brands';
 
 const CustomTabBar = ({ navigationState, position, setIndex }: any) => {
-    const inputRange = navigationState.routes.map((_: any, i: number) => i);
     const layout = useWindowDimensions();
-    const tabWidth = layout.width / navigationState.routes.length;
+    const tabWidth = layout.width / 3; // Explicitly set for 3 tabs
 
-    // Animate the indicator
-    const translateX = position.interpolate({
-        inputRange,
-        outputRange: navigationState.routes.map((_: any, i: number) => i * tabWidth),
-    });
+    // Create a new animated value for manual control
+    const indicatorPosition = useRef(new Animated.Value(navigationState.index * tabWidth)).current;
+
+    // Update indicator position when index changes
+    useEffect(() => {
+        Animated.spring(indicatorPosition, {
+            toValue: navigationState.index * tabWidth,
+            useNativeDriver: true,
+            tension: 300,
+            friction: 35,
+        }).start();
+    }, [navigationState.index]);
 
     return (
         <View style={styles.tabBar}>
+            {/* Animated Indicator */}
             <Animated.View
                 style={[
                     styles.indicator,
                     {
-                        transform: [{ translateX }],
+                        transform: [{ translateX: indicatorPosition }],
                         width: tabWidth,
                     }
                 ]}
             />
+
+            {/* Tab Buttons */}
             {navigationState.routes.map((route: any, i: number) => {
-                const opacity = position.interpolate({
-                    inputRange: [i - 1, i, i + 1],
-                    outputRange: [0.6, 1, 0.6],
-                    extrapolate: 'clamp',
-                });
+                const isActive = navigationState.index === i;
 
                 return (
                     <TouchableOpacity
@@ -47,9 +55,12 @@ const CustomTabBar = ({ navigationState, position, setIndex }: any) => {
                         style={[styles.tabItem, { width: tabWidth }]}
                         onPress={() => setIndex(i)}
                     >
-                        <Animated.Text style={[styles.tabText, { opacity }]}>
+                        <Text style={[
+                            styles.tabText,
+                            { color: isActive ? '#000' : '#666' }
+                        ]}>
                             {route.title}
-                        </Animated.Text>
+                        </Text>
                     </TouchableOpacity>
                 );
             })}
@@ -58,6 +69,7 @@ const CustomTabBar = ({ navigationState, position, setIndex }: any) => {
 };
 
 export default function DiscoverLayout() {
+    const { tab } = useLocalSearchParams();
     const layout = useWindowDimensions();
 
     const [index, setIndex] = useState(0);
@@ -66,6 +78,15 @@ export default function DiscoverLayout() {
         { key: 'friends', title: 'Friends' },
         { key: 'brands', title: 'Brands' },
     ]);
+
+    useEffect(() => {
+        if (tab) {
+            const newIndex = routes.findIndex(route => route.key === tab.toLowerCase());
+            if (newIndex !== -1) {
+                setIndex(newIndex);
+            }
+        }
+    }, [tab]);
 
     const renderScene = SceneMap({
         global: GlobalScreen,
@@ -84,8 +105,6 @@ export default function DiscoverLayout() {
                     <CustomTabBar {...props} setIndex={setIndex} />
                 )}
                 style={{ flex: 1 }}
-                swipeEnabled={true}
-                animationEnabled={true}
             />
         </View>
     );
@@ -108,7 +127,6 @@ const styles = StyleSheet.create({
     tabText: {
         fontSize: 14,
         fontWeight: '500',
-        color: '#000',
     },
     indicator: {
         position: 'absolute',
